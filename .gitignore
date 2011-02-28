@@ -1,0 +1,5 @@
+*.core
+*.swp
+damerau_levenstein
+propernames
+web2

@@ -1,4 +1,6 @@
+CC=clang
+
 all:
-	gcc -ansi -pedantic -Wall -o damerau_levenstein damerau_levenstein.c
+	${CC} -ansi -Wall -o damerau_levenstein damerau_levenstein.c
 clean:
-	rm -f damerau_levenstein
+	rm -f damerau_levenstein *.o
