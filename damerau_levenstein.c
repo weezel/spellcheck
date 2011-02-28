@@ -1,7 +1,26 @@
 #include <err.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <getopt.h>
+
+#define LINEBUFFER 1024
+
+void usage(void);
+int min(const int, const int);
+unsigned int levensteinDistance(const char *, const size_t, const char *, const size_t);
+void comparefile(const char *, const char *, const size_t);
+
+void
+usage(void)
+{
+	extern char *__progname;
+
+	(void)fprintf(stderr, "usage: %s [-w word] [-f file]\n", __progname);
+	exit(1);
+}
+
 
 int
 min(const int a, const int b)
@@ -9,20 +28,20 @@ min(const int a, const int b)
 	return a <= b ? a : b;
 }
 
-int
-levensteinDistance(const char *s1, const int s1len, const char *s2, const int s2len)
+unsigned int
+levensteinDistance(const char *s1, const size_t s1len, const char *s2, const size_t s2len)
 {
 	int cost, i , j, result;
 	int **resultable;
 
 	cost = i = j = 0;
 
-	if ((resultable = (int **)calloc(s1len+1, sizeof(int *))) == NULL)
-		err(10, NULL);
+	if ((resultable = calloc(s1len+1, sizeof(int *))) == NULL)
+		err(10, "malloc");
 
 	for (i=0; i < s1len+1; i++) {
-		if ((resultable[i] = (int *)calloc(s2len+1, sizeof(int))) == NULL)
-			err(10, NULL);
+		if ((resultable[i] = calloc(s2len+1, sizeof(int))) == NULL)
+			err(10, "malloc");
 	}
 
 	for (i=0; i <= s1len; i++)
@@ -37,8 +56,8 @@ levensteinDistance(const char *s1, const int s1len, const char *s2, const int s2
 			else
 				cost = 1;
 			resultable[i][j] = min(
-					min(resultable[i-1][j]+1, /* deletion */
-					resultable[i][j-1]+1), /* insertion */
+					min(resultable[i-1][j]+1,   /* deletion */
+					resultable[i][j-1]+1),      /* insertion */
 					resultable[i-1][j-1]+cost);	/* substitution */
 			if (i > 1 && j > 1 && s1[i] == s2[j-1] &&
 					s1[i-1] == s2[j]) {
@@ -57,18 +76,75 @@ levensteinDistance(const char *s1, const int s1len, const char *s2, const int s2
 	return result;
 }
 
+void
+comparefile(const char *fname, const char *s, const size_t len)
+{
+	FILE *fp;
+	char linebuf[LINEBUFFER];
+
+	if ((fp = fopen(fname, "r")) == NULL)
+		err(1, "%s", fname);
+
+	while ((fgets(linebuf, sizeof(linebuf), fp)) != NULL) {
+		int diff = 0;
+
+		if (linebuf[strlen(linebuf)-1] == '\n')
+			linebuf[strlen(linebuf)-1] = '\0';
+
+		diff = levensteinDistance(linebuf, strlen(linebuf), s, strlen(s));
+		fprintf(stdout, "%-10s %5s %2d\n", linebuf, s, diff);
+	}
+	fclose(fp);
+}
+
 int
 main(int argc, const char *argv[])
 {
-	int result;
+	int		 fflag;
+	int		 wflag;
+	int		 ch;
+	int		 result;
+	char	*fname;
+	char	*word1;
+	char	*word2;
 
-	if (argc < 3) {
-		fprintf(stderr, "Need two words as parameters");
-		exit(1);
+	fflag = wflag = ch = result = 0;
+	fname = word1 = word2 = NULL;
+
+	if (argc < 3)
+		usage();
+
+	while ((ch = getopt(argc, (char *const *)argv, "f:w:")) != -1) {
+		switch ((char)ch) {
+		case 'f':
+			fflag = 1;
+			fname = optarg;
+			break;
+		case 'w':
+			wflag = 1;
+			word1 = optarg;
+			break;
+		case '?':
+			if (optopt == 'f')
+				fprintf(stderr, "Missing file argument\n");
+			else if (optopt == 'w')
+				fprintf(stderr, "Missing word argument\n");
+			exit(1);
+		default:
+			usage();
+		}
 	}
 
-	result = levensteinDistance(argv[1], strlen(argv[1]), argv[2], strlen(argv[2]));
-	fprintf(stdout, "%s %s %d\n", argv[1], argv[2], result);
+	word2 = (char *const)argv[argc-1];
+
+	if (fflag)
+		comparefile(fname, word2, strlen(word2));
+	else if (wflag) {
+		result = levensteinDistance(word1, strlen(word1), word2, strlen(word2));
+		fprintf(stdout, "%-10s %5s %2d\n", word1, word2, result);
+	}
+	else
+		usage();
 
 	return (0);
 }
