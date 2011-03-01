@@ -1,15 +1,20 @@
+#include <ctype.h>
 #include <err.h>
+#include <getopt.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <getopt.h>
 
 #define LINEBUFFER 1024
+
+static int iflag;
+static int dflag;
 
 void usage(void);
 int min(const int, const int);
 unsigned int levensteinDistance(const char *, const size_t, const char *, const size_t);
+void convertlowercase(char *, const size_t);
 void comparefile(const char *, const char *, const size_t);
 
 void
@@ -17,7 +22,7 @@ usage(void)
 {
 	extern char *__progname;
 
-	(void)fprintf(stderr, "usage: %s [-w word] [-f file]\n", __progname);
+	(void)fprintf(stderr, "usage: %s [-d NUM] [-f file] [-i] [-w word] word\n", __progname);
 	exit(1);
 }
 
@@ -77,6 +82,15 @@ levensteinDistance(const char *s1, const size_t s1len, const char *s2, const siz
 }
 
 void
+convertlowercase(char *s, const size_t len)
+{
+	int i;
+
+	for (i=0; i < len; i++)
+		s[i] = tolower(s[i]);
+}
+
+void
 comparefile(const char *fname, const char *s, const size_t len)
 {
 	FILE *fp;
@@ -91,8 +105,11 @@ comparefile(const char *fname, const char *s, const size_t len)
 		if (linebuf[strlen(linebuf)-1] == '\n')
 			linebuf[strlen(linebuf)-1] = '\0';
 
+		if (iflag)
+			convertlowercase(linebuf, strlen(linebuf));
+
 		diff = levensteinDistance(linebuf, strlen(linebuf), s, strlen(s));
-		fprintf(stdout, "%-10s %5s %2d\n", linebuf, s, diff);
+		(void)fprintf(stdout, "%-10s %5s %2d\n", linebuf, s, diff);
 	}
 	fclose(fp);
 }
@@ -108,17 +125,23 @@ main(int argc, const char *argv[])
 	char	*word1;
 	char	*word2;
 
-	fflag = wflag = ch = result = 0;
+	dflag = fflag = iflag = wflag = ch = result = 0;
 	fname = word1 = word2 = NULL;
 
 	if (argc < 3)
 		usage();
 
-	while ((ch = getopt(argc, (char *const *)argv, "f:w:")) != -1) {
+	while ((ch = getopt(argc, (char *const *)argv, "d:f:iw:")) != -1) {
 		switch ((char)ch) {
+		case 'd':
+			dflag = 1;
+			break;
 		case 'f':
 			fflag = 1;
 			fname = optarg;
+			break;
+		case 'i':
+			iflag = 1;
 			break;
 		case 'w':
 			wflag = 1;
@@ -126,9 +149,9 @@ main(int argc, const char *argv[])
 			break;
 		case '?':
 			if (optopt == 'f')
-				fprintf(stderr, "Missing file argument\n");
+				(void)fprintf(stderr, "Missing file argument\n");
 			else if (optopt == 'w')
-				fprintf(stderr, "Missing word argument\n");
+				(void)fprintf(stderr, "Missing word argument\n");
 			exit(1);
 		default:
 			usage();
@@ -137,11 +160,16 @@ main(int argc, const char *argv[])
 
 	word2 = (char *const)argv[argc-1];
 
+	if (iflag) {
+		convertlowercase(word1, strlen(word1));
+		convertlowercase(word2, strlen(word2));
+	}
+
 	if (fflag)
 		comparefile(fname, word2, strlen(word2));
 	else if (wflag) {
 		result = levensteinDistance(word1, strlen(word1), word2, strlen(word2));
-		fprintf(stdout, "%-10s %5s %2d\n", word1, word2, result);
+		(void)fprintf(stdout, "%-10s %5s %2d\n", word1, word2, result);
 	}
 	else
 		usage();
