@@ -22,4 +22,6 @@ are seens as the same:
 There might be silly bugs laying around because its non maturity. Feel free to
 report them.
 
-Program this is BSD licensed.
+This program is BSD licensed.
+
+Better documentation coming near future?
