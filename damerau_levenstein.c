@@ -8,14 +8,85 @@
 
 #define LINEBUFFER 1024
 
-static int iflag;
-static int dflag;
+int iflag;
+int dflag;
+int wdist;
 
 void usage(void);
 int min(const int, const int);
 unsigned int levensteinDistance(const char *, const size_t, const char *, const size_t);
 void convertlowercase(char *, const size_t);
 void comparefile(const char *, const char *, const size_t);
+
+int
+main(int argc, const char *argv[])
+{
+	int		 fflag;
+	int		 wflag;
+	int		 ch;
+	char	*fname;
+	char	*word1;
+	char	*word2;
+
+	dflag = fflag = iflag = wflag = ch = 0;
+	fname = word1 = word2 = NULL;
+
+	if (argc < 3)
+		usage();
+
+	while ((ch = getopt(argc, (char *const *)argv, "d:f:iw:")) != -1) {
+		switch ((char)ch) {
+		case 'd': /* difference can be wdist <= distance */
+			dflag = 1;
+			wdist = atoi(optarg);
+			break;
+		case 'f':
+			fflag = 1;
+			fname = optarg;
+			break;
+		case 'i':
+			iflag = 1;
+			break;
+		case 'w':
+			wflag = 1;
+			word1 = optarg;
+			break;
+		case '?':
+			if (optopt == 'f')
+				(void)fprintf(stderr, "Missing file argument\n");
+			else if (optopt == 'w')
+				(void)fprintf(stderr, "Missing word argument\n");
+			exit(1);
+		default:
+			usage();
+		}
+	}
+
+	word2 = (char *const)argv[argc-1];
+
+	if (iflag) {
+		if (!fflag)
+			convertlowercase(word1, strlen(word1));
+		convertlowercase(word2, strlen(word2));
+	}
+
+	if (fflag)
+		comparefile(fname, word2, strlen(word2));
+	else if (wflag) {
+		int diff;
+
+		diff = levensteinDistance(word1, strlen(word1), word2, strlen(word2));
+
+		if (!dflag)
+			(void)fprintf(stdout, "%-10s %5s %2d\n", word1, word2, diff);
+		else if (diff <= wdist)
+			(void)fprintf(stdout, "%-10s %5s %2d\n", word1, word2, diff);
+	}
+	else
+		usage();
+
+	return (0);
+}
 
 void
 usage(void)
@@ -109,70 +180,12 @@ comparefile(const char *fname, const char *s, const size_t len)
 			convertlowercase(linebuf, strlen(linebuf));
 
 		diff = levensteinDistance(linebuf, strlen(linebuf), s, strlen(s));
-		(void)fprintf(stdout, "%-10s %5s %2d\n", linebuf, s, diff);
+
+		if (!dflag)
+			(void)fprintf(stdout, "%-10s %5s %2d\n", linebuf, s, diff);
+		else if (diff <= wdist)
+			(void)fprintf(stdout, "%-10s %5s %2d\n", linebuf, s, diff);
 	}
 	fclose(fp);
 }
 
-int
-main(int argc, const char *argv[])
-{
-	int		 fflag;
-	int		 wflag;
-	int		 ch;
-	int		 result;
-	char	*fname;
-	char	*word1;
-	char	*word2;
-
-	dflag = fflag = iflag = wflag = ch = result = 0;
-	fname = word1 = word2 = NULL;
-
-	if (argc < 3)
-		usage();
-
-	while ((ch = getopt(argc, (char *const *)argv, "d:f:iw:")) != -1) {
-		switch ((char)ch) {
-		case 'd':
-			dflag = 1;
-			break;
-		case 'f':
-			fflag = 1;
-			fname = optarg;
-			break;
-		case 'i':
-			iflag = 1;
-			break;
-		case 'w':
-			wflag = 1;
-			word1 = optarg;
-			break;
-		case '?':
-			if (optopt == 'f')
-				(void)fprintf(stderr, "Missing file argument\n");
-			else if (optopt == 'w')
-				(void)fprintf(stderr, "Missing word argument\n");
-			exit(1);
-		default:
-			usage();
-		}
-	}
-
-	word2 = (char *const)argv[argc-1];
-
-	if (iflag) {
-		convertlowercase(word1, strlen(word1));
-		convertlowercase(word2, strlen(word2));
-	}
-
-	if (fflag)
-		comparefile(fname, word2, strlen(word2));
-	else if (wflag) {
-		result = levensteinDistance(word1, strlen(word1), word2, strlen(word2));
-		(void)fprintf(stdout, "%-10s %5s %2d\n", word1, word2, result);
-	}
-	else
-		usage();
-
-	return (0);
-}
