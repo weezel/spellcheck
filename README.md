@@ -1,12 +1,12 @@
 ##Damerau-Levenstein spellchecker
 
-#Compare two words
+Compare two words
 	damerau_levenstein -w cat bat
 
 and the result should be like this:
 	dog          dgo  1
 
-#Compare word "possible" against words found from a file
+Compare word "possible" against words found from a file
 	damerau_levenstein -i -d 1 -f web2 possible
 and the results
 	missible   possible  1
@@ -24,4 +24,12 @@ report them.
 
 This program is BSD licensed.
 
-Better documentation coming near future?
+Better documentation coming near future.
+
+##TODO
+Apparently my Vim configuration in Linux had the wrong settings because the C
+code looks so ugly. Sorry for headache.
+
+Separate .c to .c and .h.
+
+Store words to tree for more efficient search.
