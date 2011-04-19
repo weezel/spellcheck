@@ -1,22 +1,25 @@
 ##Damerau-Levenstein spellchecker
 
 Compare two words
-	damerau_levenstein -w dog dgo
+`damerau_levenstein -w dog dgo`
 
 and the result should be like this:
+
 	dog          dgo  1
 
 Compare word "possible" against words found from a file
-	damerau_levenstein -i -d 1 -f web2 possible
-and the results
+`damerau_levenstein -i -d 1 -f web2 possible`
+and the result:
+
 	missible   possible  1
 	passible   possible  1
 	possible   possible  0
 	possibly   possible  1
 
-Attention!
+###Attention!
 It is assumed that the initial of a word is correct, therefore these strings
 are seens as the same:
+
 	diff siff -> 0
 
 ##Use cases?
