@@ -7,9 +7,9 @@ and the result should be like this:
 
 	dog          dgo  1
 
-Compare word "possible" against words found from a file
-`damerau_levenstein -i -d 1 -f web2 possible`
-and the result:
+Compare word `possible` against words found from the file `web2`.
+Command `damerau_levenstein -i -d 1 -f web2 possible` will do it.
+The result:
 
 	missible   possible  1
 	passible   possible  1
@@ -18,7 +18,7 @@ and the result:
 
 ###Attention!
 It is assumed that the initial of a word is correct, therefore these strings
-are seens as the same:
+are seen as the same:
 
 	diff siff -> 0
 
