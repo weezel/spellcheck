@@ -1,6 +1,7 @@
 ##Damerau-Levenstein spellchecker
 
-Compare two words
+Compare two words: `dog` and `dgo`
+
 `damerau_levenstein -w dog dgo`
 
 and the result should be like this:
@@ -8,7 +9,9 @@ and the result should be like this:
 	dog          dgo  1
 
 Compare word `possible` against words found from the file `web2`.
+
 Command `damerau_levenstein -i -d 1 -f web2 possible` will do it.
+
 The result:
 
 	missible   possible  1
