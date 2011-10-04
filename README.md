@@ -12,18 +12,15 @@ Compare word `possible` against words found from the file `web2`.
 
 Command `damerau_levenstein -i -d 1 -f web2 possible` will do it.
 
-The result:
+The results:
 
 	missible   possible  1
-	passible   possible  1
+	passable   possible  1
+	passably   possible  1
+	passible   possible  0
 	possible   possible  0
-	possibly   possible  1
-
-###Attention!
-It is assumed that the initial of a word is correct, therefore these strings
-are seen as the same:
-
-	diff siff -> 0
+	possibly   possible  0
+	pressible  possible  1
 
 ##Use cases?
 Well, my first though was to make a shell spell checker / auto corrector /
