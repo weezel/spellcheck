@@ -1,0 +1,2 @@
+damerau_levensthein.c
+	- might be a good idea to use realloc
