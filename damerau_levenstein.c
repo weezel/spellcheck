@@ -125,23 +125,24 @@ levensteinDistance(const char *s1, const size_t s1len, const char *s2, const siz
 	for (j=0; j <= s2len; j++)
 		resultable[0][j] = j;
 
-	for (i=1; i < s1len; i++) {
-		for (j=1; j < s2len; j++) {
-			if (s1[i] == s2[j])
+	for (i=1; i <= s1len; i++) {
+		for (j=1; j <= s2len; j++) {
+			if (s1[i-1] == s2[j-1])
 				cost = 0;
 			else
 				cost = 1;
-			resultable[i][j] = min(
-					min(resultable[i-1][j]+1,   /* deletion */
-					resultable[i][j-1]+1),      /* insertion */
-					resultable[i-1][j-1]+cost);	/* substitution */
-			if (i > 1 && j > 1 && s1[i] == s2[j-1] &&
-					s1[i-1] == s2[j]) {
+
+			resultable[i][j] = min(min(
+					   resultable[i-1][j] + 1,		/* deletion */
+					   resultable[i][j-1] + 1),		/* insertion */
+					   resultable[i-1][j-1] + cost);	/* substitution */
+
+			if (i > 1 && j > 1 && s1[i] == s2[j-1] && s1[i-1] == s2[j]) {
 				resultable[i][j] = min(resultable[i][j],
-						resultable[i-2][j-2]+cost);	  /* transposition */
+						   resultable[i-2][j-2] + cost); /* transposition */
 			}
 		}
-	} 
+	}
 
 	result = resultable[s1len-1][s2len-1];
 
