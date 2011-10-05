@@ -7,6 +7,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined __linux__
+#define u_char unsigned char
+#include <bsd/stdio.h>
+#include <bsd/stdlib.h>
+#endif
+
 #define LINEBUFFER 1024
 
 int iflag;
