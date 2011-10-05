@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <err.h>
 #include <getopt.h>
+#include <limits.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,6 +11,7 @@
 
 int iflag;
 int dflag;
+int tflag;
 int wdist;
 
 void usage(void);
@@ -24,9 +26,11 @@ main(int argc, const char *argv[])
 	int		 fflag;
 	int		 wflag;
 	int		 ch;
-	char	*fname;
-	char	*word1;
-	char	*word2;
+	char		*fname;
+	const char	*errstr;
+	char		*word1;
+	char		*word2;
+
 
 	dflag = fflag = iflag = wflag = ch = 0;
 	fname = word1 = word2 = NULL;
@@ -38,7 +42,9 @@ main(int argc, const char *argv[])
 		switch ((char)ch) {
 		case 'd': /* difference can be wdist <= distance */
 			dflag = 1;
-			wdist = atoi(optarg);
+			wdist = strtonum(optarg, 0, 128, &errstr);
+			if (errstr)
+				errx(1, "Error: %s\nOut of range: %s", errstr, optarg);
 			break;
 		case 'f':
 			fflag = 1;
@@ -107,10 +113,10 @@ min(const int a, const int b)
 unsigned int
 levensteinDistance(const char *s1, const size_t s1len, const char *s2, const size_t s2len)
 {
-	int cost, i , j, result;
+	int cost, i , j, result, sumofall;
 	int **resultable;
 
-	cost = i = j = 0;
+	cost = i = j = sumofall = 0;
 
 	if ((resultable = calloc(s1len+1, sizeof(int *))) == NULL)
 		err(10, "malloc");
@@ -127,24 +133,32 @@ levensteinDistance(const char *s1, const size_t s1len, const char *s2, const siz
 
 	for (i=1; i <= s1len; i++) {
 		for (j=1; j <= s2len; j++) {
-			if (s1[i-1] == s2[j-1])
-				cost = 0;
-			else
-				cost = 1;
+			cost = (s1[i-1] == s2[j-1]) ?  0 : 1;
 
-			resultable[i][j] = min(min(
+			sumofall = min(min(
 					   resultable[i-1][j] + 1,		/* deletion */
-					   resultable[i][j-1] + 1),		/* insertion */
+					   resultable[i][j-1] + 1		/* insertion */
+					   ),
 					   resultable[i-1][j-1] + cost);	/* substitution */
 
-			if (i > 1 && j > 1 && s1[i] == s2[j-1] && s1[i-1] == s2[j]) {
-				resultable[i][j] = min(resultable[i][j],
-						   resultable[i-2][j-2] + cost); /* transposition */
+
+			/*
+			if (i > 1 && j > 1) {
+				int transpos = resultable[i-1][j-2] + 1;
+
+				if (s1[i-2] != s2[j-1])
+					transpos++;
+				if (s1[i-1] != s2[j-2])
+					transpos++;
+				if (sumofall > transpos)
+					sumofall = transpos;
 			}
+			*/
+			resultable[i][j] = sumofall;
 		}
 	}
 
-	result = resultable[s1len-1][s2len-1];
+	result = resultable[s1len][s2len];
 
 	for (i=0; i < s1len+1; i++)
 		free(resultable[i]);

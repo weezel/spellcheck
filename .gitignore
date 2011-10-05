@@ -1,5 +1,6 @@
+core
 *.core
 *.swp
-damerau_levenstein
+damerau_levenshtein
 propernames
 web2
