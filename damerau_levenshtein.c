@@ -9,7 +9,6 @@
 
 #if defined __linux__
 #define u_char unsigned char
-#include <bsd/stdio.h>
 #include <bsd/stdlib.h>
 #endif
 
@@ -55,6 +54,7 @@ main(int argc, const char *argv[])
 		case 'f':
 			fflag = 1;
 			fname = optarg;
+			/* TODO add support to stdin */
 			break;
 		case 'i':
 			iflag = 1;

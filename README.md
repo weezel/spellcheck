@@ -10,12 +10,14 @@ and the result should be like this:
 
 Compare word `possible` against words found from the file `web2`.
 
-Command `damerau_levenstein -i -d 1 -f web2 possible` will do it.
+Command `damerau_levenshtein -i -d 1 -f web2 possible` will do it.
 
 The results:
+	passible   possible  1
 
-	Will fix this soon, hopefully :)
+	possible   possible  0
 
+	possibly   possible  1
 
 ##Use cases?
 Well, my first though was to make a shell spell checker / auto corrector /
