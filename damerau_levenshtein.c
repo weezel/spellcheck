@@ -8,22 +8,15 @@
 #include <string.h>
 
 #if defined __linux__
-#define u_char unsigned char
 #include <bsd/stdlib.h>
 #endif
 
-#define LINEBUFFER 1024
+#include "damerau_levenshtein.h"
 
 int iflag;
 int dflag;
 int tflag;
 int wdist;
-
-void usage(void);
-int min(const int, const int);
-unsigned int levensteinDistance(const char *, const size_t, const char *, const size_t);
-void convertlowercase(char *, const size_t);
-void comparefile(const char *, const char *, const size_t);
 
 int
 main(int argc, const char *argv[])
@@ -78,8 +71,8 @@ main(int argc, const char *argv[])
 
 	if (iflag) {
 		if (!fflag)
-			convertlowercase(word1, strlen(word1));
-		convertlowercase(word2, strlen(word2));
+			convertlowercase(word1, sizeof(word1));
+		convertlowercase(word2, sizeof(word2));
 	}
 
 	if (fflag)
@@ -110,7 +103,7 @@ usage(void)
 }
 
 
-int
+inline int
 min(const int a, const int b)
 {
 	return a <= b ? a : b;
@@ -127,18 +120,18 @@ levensteinDistance(const char *s1, const size_t s1len, const char *s2, const siz
 	if ((resultable = calloc(s1len+1, sizeof(int *))) == NULL)
 		err(10, "malloc");
 
-	for (i=0; i < s1len+1; i++) {
+	for (i = 0; i < s1len+1; i++) {
 		if ((resultable[i] = calloc(s2len+1, sizeof(int))) == NULL)
 			err(10, "malloc");
 	}
 
-	for (i=0; i <= s1len; i++)
+	for (i = 0; i <= s1len; i++)
 		resultable[i][0] = i;
-	for (j=0; j <= s2len; j++)
+	for (j = 0; j <= s2len; j++)
 		resultable[0][j] = j;
 
-	for (i=1; i <= s1len; i++) {
-		for (j=1; j <= s2len; j++) {
+	for (i = 1; i <= s1len; i++) {
+		for (j = 1; j <= s2len; j++) {
 			cost = (s1[i-1] == s2[j-1]) ?  0 : 1;
 
 			sumofall = min(min(
@@ -166,27 +159,27 @@ levensteinDistance(const char *s1, const size_t s1len, const char *s2, const siz
 
 	result = resultable[s1len][s2len];
 
-	for (i=0; i < s1len+1; i++)
+	for (i = 0; i < s1len+1; i++)
 		free(resultable[i]);
 	free(resultable);
 
 	return result;
 }
 
-void
+inline void
 convertlowercase(char *s, const size_t len)
 {
-	int i;
+	size_t	 i = 0;
 
-	for (i=0; i < len; i++)
+	for (i = 0; i < len + 1; i++)
 		s[i] = tolower(s[i]);
 }
 
 void
 comparefile(const char *fname, const char *s, const size_t len)
 {
-	FILE *fp;
-	char linebuf[LINEBUFFER];
+	FILE	*fp;
+	char	 linebuf[BUFSIZ];
 
 	if ((fp = fopen(fname, "r")) == NULL)
 		err(1, "%s", fname);
@@ -194,13 +187,13 @@ comparefile(const char *fname, const char *s, const size_t len)
 	while ((fgets(linebuf, sizeof(linebuf), fp)) != NULL) {
 		int diff = 0;
 
-		if (linebuf[strlen(linebuf)-1] == '\n')
-			linebuf[strlen(linebuf)-1] = '\0';
+		if (linebuf[strlen(linebuf) - 1] == '\n') /* FIXME */
+			linebuf[strlen(linebuf) - 1] = '\0';
 
 		if (iflag)
-			convertlowercase(linebuf, strlen(linebuf));
+			convertlowercase(linebuf, sizeof(linebuf));
 
-		diff = levensteinDistance(linebuf, strlen(linebuf), s, strlen(s));
+		diff = levensteinDistance(linebuf, sizeof(linebuf), s, sizeof(s));
 
 		if (!dflag)
 			(void)fprintf(stdout, "%-10s %5s %2d\n", linebuf, s, diff);
