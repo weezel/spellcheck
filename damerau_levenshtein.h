@@ -1,5 +1,5 @@
 #ifndef _DAMERAU_LEVENHSTHEIN_H_
-#define	_DAMERAU_LEVENHSTHEIN_H_
+#define _DAMERAU_LEVENHSTHEIN_H_
 #endif
 
 void		usage(void);
