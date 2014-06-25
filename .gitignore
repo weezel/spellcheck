@@ -2,5 +2,6 @@ core
 *.core
 *.swp
 damerau_levenshtein
+ngram
 propernames
 web2
