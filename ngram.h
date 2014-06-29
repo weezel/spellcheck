@@ -1,5 +1,5 @@
-#ifndef	_NGRAM_H_
-#define	_NGRAM_H_
+#ifndef	__NGRAM_H__
+#define	__NGRAM_H__
 
 #if defined __linux__
 #include "lnxport.h"

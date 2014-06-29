@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,15 +11,28 @@
 void
 ngram(const char *word, size_t len, size_t gramsize)
 {
-	size_t	 off = 0;
+	char		*c = 0;
+	size_t		 i = 0;
+	struct gram	*prevgram = NULL;
 
 	SLIST_INIT(&grams_head);
 
-	/*while (off < len || off != 0)*/ {
-		struct gram	*tmp = init_gram(gramsize);
+	c = (char *) word;
 
-		off = strlcpy(tmp->buf, word, sizeof(tmp->buf));
-		SLIST_INSERT_HEAD(&grams_head, tmp, grams);
+	while (iscntrl(*c) == 0) {
+		struct gram	*newgram = init_gram(gramsize);
+
+		i = 0;
+
+		while (i < gramsize && iscntrl(*c) == 0)
+			newgram ->buf[++i] = *c++;
+		newgram->buf[i] = '\0';
+
+		if (prevgram == NULL)
+			SLIST_INSERT_HEAD(&grams_head, newgram, grams);
+		else
+			SLIST_INSERT_AFTER(prevgram, newgram, grams);
+		prevgram = newgram;
 	}
 }
 
@@ -51,7 +65,7 @@ free_gramlist(void)
 int
 main(int argc, const char *argv[])
 {
-	char		 testword[] = "Test";
+	char		 testword[] = "Testi";
 	struct gram	*np = NULL;
 
 	ngram(testword, sizeof(testword), 2);

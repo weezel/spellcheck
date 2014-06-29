@@ -1,4 +1,4 @@
-CC=		gcc
+CC=		clang
 CFLAGS=		-pedantic -Wall -std=c99 -Wformat=2 -g
 LDFLAGS=
 OS=		$(shell uname)
