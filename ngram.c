@@ -1,10 +1,12 @@
+#include <sys/types.h>
+#include <sys/queue.h>
+
 #include <ctype.h>
 #include <err.h>
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/queue.h>
 
 #include "ngram.h"
 
@@ -67,6 +69,8 @@ main(int argc, const char *argv[])
 {
 	char		 testword[] = "Testi";
 	struct gram	*np = NULL;
+
+	setlocale(LC_ALL, "");
 
 	ngram(testword, sizeof(testword), 2);
 	SLIST_FOREACH(np, &grams_head, grams)

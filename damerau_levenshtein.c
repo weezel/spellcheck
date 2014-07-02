@@ -2,6 +2,7 @@
 #include <err.h>
 #include <getopt.h>
 #include <limits.h>
+#include <locale.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,6 +30,7 @@ main(int argc, const char *argv[])
 	char		*word1;
 	char		*word2;
 
+	setlocale(LC_ALL, "");
 
 	dflag = fflag = iflag = wflag = ch = 0;
 	fname = word1 = word2 = NULL;
