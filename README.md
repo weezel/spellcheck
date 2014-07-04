@@ -1,4 +1,6 @@
-##Damerau-Levenstein spellchecker
+# Spellcheckers written in C
+
+##Levenstein (edit distance)
 
 Compare two words: `dog` and `dgo`
 
@@ -18,6 +20,11 @@ The results:
 	possible   possible  0
 
 	possibly   possible  1
+
+##Ngram
+Create Ngram from certain word. When used with Jaccard index one can count
+similarity among the words.
+--This section needs more love--
 
 ##Use cases?
 Well, my first though was to make a shell spell checker / auto corrector /
